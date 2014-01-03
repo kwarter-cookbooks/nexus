@@ -44,16 +44,16 @@ if node[:nexus][:app_server_proxy][:use_self_signed]
     action :create
   end
 else
-  ssl_files = Chef::Nexus.get_ssl_files_data_bag(node)
-  Chef::Application.fatal!("No entry found in nexus_ssl_files data bag for key #{node[:nexus][:app_server_proxy][:ssl][:key]}") unless ssl_files[node[:nexus][:app_server_proxy][:ssl][:key]]
+  # This differs from the original because our data_bags are setup differently than riotgames
+  ssl_files = data_bag_item(node.chef_environment, 'proxy')
+  Chef::Application.fatal!("No entry found in nexus_ssl_files data bag for key #{node[:nexus][:app_server_proxy][:ssl][:key]}") unless ssl_files['ssl']['key']
 
   log "Using nexus_ssl_files data bag entry for #{node[:nexus][:app_server_proxy][:ssl][:key]}" do
     level :info
   end
 
-  entry = ssl_files[node[:nexus][:app_server_proxy][:ssl][:key]]
-  certificate = Chef::Nexus.decode(entry[:crt])
-  key = Chef::Nexus.decode(entry[:key])
+  certificate = ssl_files['ssl']['cert']
+  key = ssl_files['ssl']['key']
 
   file "#{node[:nginx][:dir]}/shared/certificates/nexus-proxy.crt" do
     content certificate
