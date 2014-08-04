@@ -34,13 +34,13 @@ else
   default['java']['openjdk_packages'] = ["openjdk-#{node['java']['jdk_version']}-jdk"]
 end
 
-default[:nexus][:version]                                      = '2.7.0-04'
+default[:nexus][:version]                                      = '2.8.0-05'
 default[:nexus][:base_dir]                                      = '/'
 default[:nexus][:user]                                         = 'nexus'
 default[:nexus][:group]                                        = 'nexus'
-default[:nexus][:external_version]                             = '2.7.0-04'
+default[:nexus][:external_version]                             = '2.8.0'
 default[:nexus][:url]                                          = "http://www.sonatype.org/downloads/nexus-#{node[:nexus][:external_version]}-bundle.tar.gz"
-default[:nexus][:checksum]                                     = '6043f813faf65f1a2b80b629abace24cf51eb5a9e1e8ee62f88725539954b9cd'
+default[:nexus][:checksum]                                     = '9ccec9856922d2e5d4942feb9f7cdc8f73e75c79583e50b816650a02eff7045d'
 
 default[:nexus][:port]                                         = '8081'
 default[:nexus][:host]                                         = '0.0.0.0'
@@ -59,7 +59,7 @@ default[:nexus][:app_server_proxy][:ssl][:key]                 = node[:fqdn]
 
 default[:nexus][:app_server_proxy][:use_self_signed]  = false
 default[:nexus][:app_server_proxy][:server_name]      = node[:fqdn]
-default[:nexus][:app_server_proxy][:port]             = "http://localhost:#{node[:nexus][:port]}"
+default[:nexus][:app_server_proxy][:port]             = "http://127.0.0.1:#{node[:nexus][:port]}"
 default[:nexus][:app_server_proxy][:server][:options] = [
   "client_max_body_size 200M",
   "client_body_buffer_size 512k",
@@ -75,3 +75,5 @@ default[:nexus][:cli][:repository]                             = "releases"
 default[:nexus][:cli][:default_admin_credentials_updated]      = false
 default[:nexus][:cli][:retries]                                = 3
 default[:nexus][:cli][:retry_delay]                            = 10
+  
+default[:nexus][:use_chef_vault]                              = false

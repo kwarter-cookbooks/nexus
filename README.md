@@ -100,9 +100,9 @@ Attribute  | Description                   | Type    | Default
 ---------  |-------------                  |-----    |--------
 name       | Name of the plugin to install | String  | name
 
-## nexus\_repository
+## nexus\_hosted\_repository
 
-Resource provider for creating and deleting Neuxs repositories.
+Resource provider for creating and deleting hosted Neuxs repositories.
 
 ### Actions
 Action  | Description              | Default
@@ -114,10 +114,49 @@ update  | Updates a repository     |
 ### Attributes
 Attribute        | Description                                                         | Type                  | Default
 ---------        |-------------                                                        |-----                  |--------
-name             | Name of the repository to create/delete                             | String                | name
-type             | The type of repository - either "hosted" or "proxy".                | String                |
+name             | Name of the repository to create/delete/update                             | String                | name
+publisher             | The type of repository - either "hosted" or "proxy".                | String                |
+policy           | Either "HOSTED" or "SNAPSHOT" repository policy for artifacts       | String                |
+
+
+## nexus\_group\_repository
+
+Resource provider for creating and deleting group Neuxs repositories.
+
+### Actions
+Action  | Description              | Default
+------- |-------------             |---------
+create  | Creates a new repository | Yes
+delete  | Deletes a repository     |
+add_to  | Adds a repository to group repository     | 
+remove_from  | Removes a repository to group repository     | 
+
+
+### Attributes
+Attribute        | Description                                                         | Type                  | Default
+---------        |-------------                                                        |-----                  |--------
+name             | Name of the repository to create/delete/add_to /remove_from                            | String                | name
+repository             | Repository to add/remove from group repo                | String                |
+
+
+## nexus\_proxy\_repository
+
+Resource provider for creating and deleting proxy Neuxs repositories.
+
+### Actions
+Action  | Description              | Default
+------- |-------------             |---------
+create  | Creates a new repository | Yes
+delete  | Deletes a repository     |
+update  | Updates a repository     | 
+
+### Attributes
+Attribute        | Description                                                         | Type                  | Default
+---------        |-------------                                                        |-----                  |--------
+name             | Name of the repository to create/delete/update                             | String                | name
 url              | The url used for a proxy repository.                                | String                |
-publisher        | Whether this repository is a publisher of artifacts.                | TrueClass, FalseClass |
+policy           | Either "HOSTED" or "SNAPSHOT" repository policy for artifacts       | String                |
+publisher             | The type of repository - either "hosted" or "proxy".                | String                |
 subscriber       | Whether this repository is a subscriber to artifacts.               | TrueClass, FalseClass |
 preemptive_fetch | Whether this (proxy) repository should preemptively fetch artifacts | TrueClass, FalseClass |
 
@@ -133,8 +172,8 @@ update  | Updates a global Nexus setting to a new value. | Yes
 ### Attributes
 Attribute  | Description                                  | Type                          | Default
 ---------  |-------------                                 |-----                          |--------
-path       | The element of the settings that is going to be changed. | String                        | name
-value      | The new value to update the path to.                     | String, TrueClass, FalseClass |
+path       | Period '.' delimited path to element of the settings that is going to be changed. | String                        | name
+value      | The new value to update the path to.                     | String, TrueClass, FalseClass, Hash |
 
 ## nexus\_user
 
@@ -222,9 +261,6 @@ Most attributes under nexus are basic attributes needed for correctly installing
 * nexus.bin_dir - the above home/bin
 * nexus.work_dir - the above path/sonatype-work/nexus
 * nexus.plugins - an Array of Nexus plugins that will be installed by the default recipe.
-* nexus.hosted\_repositories - an Array of Hashes that contain the following structure: `{ name: "My Hosted Repo", publisher: true }`
-* nexus.proxy\_repositories - an Array of Hashes that contain the following structure: `{ name: "My Proxy Repo", subscriber: true, publisher: false, url: "http://some-other-nexus/repo" }`
-* nexus.group\_repositories - an Array of Hashes that contain the following structure: `{ name: "My Group Repo", add: ["My Hosted Repo"], remote: ["My Proxy Repo"] }`
 * nexus.logs.logs\_to\_keep - a fixnum value for the maximum number of logs the Nexus should keep.
 
 Attributes under app\_server\_proxy help when you want to install an proxy in front of the running Nexus Jetty container. At the moment, the only supported alternative is nginx. Also, here is where you can configure SSL for either nginx or Jetty.
@@ -258,7 +294,7 @@ Author:: Kyle Allan (<kallan@riotgames.com>)
 Based on work by Joseph Holsten (<joseph@josephholsten.com>), Charles Scott (<connaryscott@gmail.com>),
 Greg Schueler (<greg.schueler@gmail.com>), and Seth Chisamore (<schisamo@opscode.com>)
 
-Copyright 2013, Riot Games
+Copyright 2014, Riot Games
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

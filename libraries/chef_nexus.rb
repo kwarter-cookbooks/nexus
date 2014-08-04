@@ -200,8 +200,8 @@ class Chef
           @encrypted_data_bags = {} unless @encrypted_data_bags
 
           if @encrypted_data_bags[data_bag].nil?
-            data_bag_item = encrypted_data_bag_item(data_bag, node.chef_environment)
-            data_bag_item ||= encrypted_data_bag_item(data_bag, WILDCARD_DATABAG_ITEM)
+            data_bag_item = encrypted_data_bag_item(node, data_bag, node.chef_environment)
+            data_bag_item ||= encrypted_data_bag_item(node, data_bag, WILDCARD_DATABAG_ITEM)
             @encrypted_data_bags[data_bag] = data_bag_item
           end          
 
@@ -211,9 +211,24 @@ class Chef
           raise Nexus::EncryptedDataBagNotFound.new(data_bag)
         end
 
-        def encrypted_data_bag_item(data_bag, data_bag_item)
-          Mash.from_hash(Chef::EncryptedDataBagItem.load(data_bag, data_bag_item).to_hash)
+        def encrypted_data_bag_item(node, data_bag, data_bag_item)
+          if node[:nexus][:use_chef_vault]
+            item = ChefVault::Item.load(data_bag, data_bag_item)
+          else
+            item = Chef::EncryptedDataBagItem.load(data_bag, data_bag_item)
+          end
+          Mash.from_hash(item.to_hash)
         rescue Net::HTTPServerException => e
+          nil
+
+        # chef_data_bag_item.rb fails to handle scenario of missing data bag :-(,
+        # it reports this as Chef::Exceptions::ValidationFailed exception.
+        # Adding a different rescue block if things exception needs to be handled differently
+        rescue Chef::Exceptions::ValidationFailed => e
+          nil
+
+        # if you are using vault and if data bag it not present we need to handle that exception as well
+        rescue ChefVault::Exceptions::KeysNotFound
           nil
         end
     end

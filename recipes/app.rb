@@ -28,7 +28,8 @@ artifact_deploy node[:nexus][:name] do
   owner             node[:nexus][:user]
   group             node[:nexus][:group]
   symlinks({
-    "log" => "#{node[:nexus][:bundle_name]}/logs"
+    "log" => "#{node[:nexus][:bundle_name]}/logs",
+    "tmp" => "#{node[:nexus][:bundle_name]}/tmp"
   })
 
   before_extract Proc.new {
@@ -41,9 +42,11 @@ artifact_deploy node[:nexus][:name] do
   before_symlink Proc.new {
     nexus_home = ::File.join(release_path, node[:nexus][:bundle_name])
 
-    directory "#{nexus_home}/logs" do
-      recursive true
-      action :delete
+    [ "#{nexus_home}/logs", "#{nexus_home}/tmp" ].each do |dir|
+      directory dir do
+        recursive true
+        action :delete
+      end
     end
   }
 
@@ -52,6 +55,14 @@ artifact_deploy node[:nexus][:name] do
     nexus_home = ::File.join(release_path, node[:nexus][:bundle_name])
     conf_dir   = ::File.join(nexus_home, "conf")
     bin_dir    = ::File.join(nexus_home, "bin")
+
+    [ node[:nexus][:pid_dir], node[:nexus][:work_dir] ].each do |dir|
+      directory dir do
+        owner     node[:nexus][:user]
+        group     node[:nexus][:user]
+        recursive true
+      end
+    end
 
     template "#{bin_dir}/#{node[:nexus][:name]}" do
       source "nexus.erb"
@@ -89,7 +100,7 @@ artifact_deploy node[:nexus][:name] do
     end
 
     link "/etc/init.d/nexus" do
-      to "#{bin_dir}/nexus"
+      to "#{bin_dir}/#{node[:nexus][:name]}"
     end
   }
 end
